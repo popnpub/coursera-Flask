@@ -1,5 +1,6 @@
 import requests
 import json
+from pprint import pprint
 
 def emotion_detector(text_to_analyse):
     # Define the URL for the sentiment analysis API
@@ -14,19 +15,19 @@ def emotion_detector(text_to_analyse):
     # Make a POST request to the API with the payload and headers
     response = requests.post(url, json=myobj, headers=header)
 
-    return response.text
-
     # Parse the response from the API
     formatted_response = json.loads(response.text)
 
-    # If the response status code is 200, extract the label and score from the response
-    if response.status_code == 200:
-        label = formatted_response['documentSentiment']['label']
-        score = formatted_response['documentSentiment']['score']
-    # If the response status code is 500, set label and score to None
-    elif response.status_code == 500:
-        label = None
-        score = None
-
     # Return the label and score in a dictionary
-    return {'label': label, 'score': score}
+    emotions = formatted_response['emotionPredictions'][0]['emotion']
+    res = {'anger': float(emotions['anger']),
+            'disgust': float(emotions['disgust']),
+            'fear': float(emotions['fear']),
+            'joy': float(emotions['joy']),
+            'sadness': float(emotions['sadness']),
+            }
+
+    dominant = sorted([(v,k) for k,v in res.items()])[-1][1]
+    res['dominant_emotion'] = dominant
+    
+    return res
