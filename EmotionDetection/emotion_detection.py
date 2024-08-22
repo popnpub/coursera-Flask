@@ -15,19 +15,28 @@ def emotion_detector(text_to_analyse):
     # Make a POST request to the API with the payload and headers
     response = requests.post(url, json=myobj, headers=header)
 
-    # Parse the response from the API
-    formatted_response = json.loads(response.text)
-
-    # Return the label and score in a dictionary
-    emotions = formatted_response['emotionPredictions'][0]['emotion']
-    res = {'anger': float(emotions['anger']),
-            'disgust': float(emotions['disgust']),
-            'fear': float(emotions['fear']),
-            'joy': float(emotions['joy']),
-            'sadness': float(emotions['sadness']),
+    if response.status_code == 400:
+        res = {'anger': None,
+                'disgust': None,
+                'fear': None,
+                'joy': None,
+                'sadness': None,
+                'dominant_emotion': None,
             }
+    else:
+        # Parse the response from the API
+        formatted_response = json.loads(response.text)
 
-    dominant = sorted([(v,k) for k,v in res.items()])[-1][1]
-    res['dominant_emotion'] = dominant
-    
+        # Return the label and score in a dictionary
+        emotions = formatted_response['emotionPredictions'][0]['emotion']
+        res = {'anger': float(emotions['anger']),
+                'disgust': float(emotions['disgust']),
+                'fear': float(emotions['fear']),
+                'joy': float(emotions['joy']),
+                'sadness': float(emotions['sadness']),
+                }
+
+        dominant = sorted([(v,k) for k,v in res.items()])[-1][1]
+        res['dominant_emotion'] = dominant
+
     return res
